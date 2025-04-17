@@ -1,0 +1,233 @@
+@model RenewableEnergyController.Models.EnergyProductionModel
+@{ViewBag.Title="Energy Production";
+
+}
+
+
+<div class="energy-production-container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2><i class="fa fa-bolt"></i> Energy Production</h2>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Production Overview</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row stats">
+                        <div class="col-md-4 stat-item">
+                            <div class="stat-icon"><i class="fa fa-flash"></i></div>
+                            <div class="stat-value">@Model.CurrentKWh.ToString("F1")</div>
+                            <div class="stat-label">Current kWh</div>
+                        </div>
+                        <div class="col-md-4 stat-item">
+                            <div class="stat-icon"><i class="fa fa-calendar-day"></i></div>
+                            <div class="stat-value">@Model.DailyKWh.ToString("F1")</div>
+                            <div class="stat-label">Daily kWh</div>
+                        </div>
+                        <div class="col-md-4 stat-item">
+                            <div class="stat-icon"><i class="fa fa-calendar-alt"></i></div>
+                            <div class="stat-value">@Model.MonthlyKWh</div>
+                            <div class="stat-label">Monthly kWh</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Production History (Last 24 Hours)</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-container">
+                        <canvas id="productionHistoryChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Production Breakdown</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-container">
+                        <canvas id="productionBreakdownChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Production Data</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>kWh</th>
+                                    <th>% of Daily Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreacvardataPointinModel.ProductionData.OrderByDescending(d=>d.TimeStamp))
+
+    {
+                                <tr>
+                                    <td>
+                                        @dataPoint.TimeStamp.ToString("MM/dd/yyyy HH:mm")
+                                </td>
+                                    <td>
+                                @dataPoint.KWh.ToString("F2")
+                                    </td>
+
+
+                                <td>
+                                @((dataPoint.KWh/Model.DailyKWh*100).ToString("F1"))%
+                                </td>
+
+
+                                </tr>
+
+
+}
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Production History Chart
+            var historyCtx = document.getElementById('productionHistoryChart').getContext('2d');
+            var productionData = @Html.Raw(Json.Encode(Model.ProductionData.Select(d => new {
+                time = d.TimeStamp.ToString("HH:mm"),
+                value = d.KWh
+            }).ToList()));
+
+            var gradientFill = historyCtx.createLinearGradient(0, 0, 0, 350);
+            gradientFill.addColorStop(0, 'rgba(51, 102, 204, 0.4)');
+            gradientFill.addColorStop(1, 'rgba(51, 102, 204, 0.05)');
+
+            var productionHistoryChart = new Chart(historyCtx, {
+                type: 'line',
+                data: {
+                    labels: productionData.map(function(d) { return d.time; }),
+                    datasets: [{
+                        label: 'kWh',
+                        data: productionData.map(function(d) { return d.value; }),
+                        borderColor: '#3366cc',
+                        backgroundColor: gradientFill,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#3366cc'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'kWh'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItem) {
+                                    return tooltipItem[0].label;
+                                },
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' kWh';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Production Breakdown Chart
+            var breakdownCtx = document.getElementById('productionBreakdownChart').getContext('2d');
+
+            // Sample data for breakdown chart (replace with actual data in production)
+            var breakdownData = {
+                labels: [
+                    'Morning (6AM-12PM)',
+                    'Afternoon (12PM-6PM)',
+                    'Evening (6PM-12AM)',
+                    'Night (12AM-6AM)'
+                ],
+                datasets: [{
+                    data: [35, 45, 15, 5],
+                    backgroundColor: [
+                        '#FFD700', // Morning - Gold
+                        '#FF8C00', // Afternoon - Dark Orange
+                        '#4682B4', // Evening - Steel Blue
+                        '#191970'  // Night - Midnight Blue
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            var productionBreakdownChart = new Chart(breakdownCtx, {
+                type: 'pie',
+                data: breakdownData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var label = context.label || '';
+                                    var value = context.parsed || 0;
+                                    return label + ': ' + value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,371 @@
+/* Content/dashboard.css */
+/* Dashboard-specific styling */
+
+/* Dashboard cards */
+.card {
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #455a64;
+    }
+
+.card-body {
+    padding: 15px;
+}
+
+/* Energy production section */
+.energy-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.energy-stat-item {
+    flex: 1;
+    text-align: center;
+    padding: 15px;
+    border-right: 1px solid #e0e0e0;
+}
+
+    .energy-stat-item:last-child {
+        border-right: none;
+    }
+
+.energy-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #00897b;
+    margin-bottom: 5px;
+}
+
+.energy-stat-label {
+    font-size: 12px;
+    color: #90a4ae;
+    text-transform: uppercase;
+}
+
+.energy-chart-container {
+    height: 250px;
+    margin-top: 20px;
+}
+
+/* Battery status section */
+.battery-indicator {
+    width: 100%;
+    height: 30px;
+    background-color: #eceff1;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.battery-level {
+    height: 100%;
+    border-radius: 15px;
+    background-color: #4caf50;
+    transition: width 0.5s ease-in-out;
+}
+
+    .battery-level.warning {
+        background-color: #ff9800;
+    }
+
+    .battery-level.danger {
+        background-color: #f44336;
+    }
+
+.battery-info {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.battery-info-item {
+    flex: 1;
+    min-width: 150px;
+    margin-bottom: 15px;
+}
+
+.battery-info-label {
+    font-size: 12px;
+    color: #90a4ae;
+    margin-bottom: 5px;
+}
+
+.battery-info-value {
+    font-size: 16px;
+    color: #455a64;
+}
+
+/* Alerts section */
+.alerts-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.alert-item {
+    padding: 10px 15px;
+    border-left: 3px solid transparent;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border-radius: 2px;
+}
+
+    .alert-item.warning {
+        border-left-color: #ff9800;
+    }
+
+    .alert-item.info {
+        border-left-color: #2196f3;
+    }
+
+    .alert-item.success {
+        border-left-color: #4caf50;
+    }
+
+    .alert-item.danger {
+        border-left-color: #f44336;
+    }
+
+.alert-message {
+    margin-bottom: 5px;
+    color: #455a64;
+}
+
+.alert-timestamp {
+    font-size: 12px;
+    color: #90a4ae;
+}
+
+/* Analytics section */
+.analytics-chart-container {
+    height: 200px;
+    margin-bottom: 15px;
+}
+
+.analytics-stats {
+    display: flex;
+    justify-content: space-between;
+}
+
+.analytics-stat-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    margin: 0 5px;
+}
+
+    .analytics-stat-item:first-child {
+        margin-left: 0;
+    }
+
+    .analytics-stat-item:last-child {
+        margin-right: 0;
+    }
+
+.analytics-stat-label {
+    font-size: 12px;
+    color: #90a4ae;
+    margin-bottom: 5px;
+}
+
+.analytics-stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #455a64;
+}
+
+/* System health section */
+.system-health-status {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.system-health-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+    .system-health-indicator.online {
+        background-color: #4caf50;
+    }
+
+    .system-health-indicator.offline {
+        background-color: #f44336;
+    }
+
+.system-health-text {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.system-health-details {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.system-health-item {
+    flex: 1;
+    min-width: 150px;
+    margin-bottom: 15px;
+}
+
+.system-health-item-label {
+    font-size: 12px;
+    color: #90a4ae;
+    margin-bottom: 5px;
+}
+
+.system-health-item-value {
+    font-size: 16px;
+    color: #455a64;
+}
+
+.component-status-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .component-status-table th,
+    .component-status-table td {
+        padding: 10px 15px;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .component-status-table th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+        color: #455a64;
+    }
+
+.component-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+    .component-status.ok {
+        background-color: #e8f5e9;
+        color: #388e3c;
+    }
+
+    .component-status.warning {
+        background-color: #fff8e1;
+        color: #f57c00;
+    }
+
+    .component-status.error {
+        background-color: #ffebee;
+        color: #d32f2f;
+    }
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 60px;
+        overflow: hidden;
+    }
+
+    .sidebar-header h4 {
+        display: none;
+    }
+
+    .nav-sidebar li a span {
+        display: none;
+    }
+
+    .nav-sidebar li a i {
+        margin-right: 0;
+        font-size: 18px;
+    }
+
+    .main-content {
+        margin-left: 60px;
+    }
+
+    .user-info span {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: static;
+        height: auto;
+        width: 100%;
+    }
+
+    .sidebar-header h4 {
+        display: block;
+    }
+
+    .nav-sidebar {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+        .nav-sidebar li {
+            width: 25%;
+            border-bottom: none;
+            text-align: center;
+        }
+
+            .nav-sidebar li a i {
+                display: block;
+                margin: 0 auto 5px;
+                font-size: 24px;
+            }
+
+            .nav-sidebar li a span {
+                display: block;
+                font-size: 10px;
+            }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .user-info {
+        position: static;
+    }
+
+    .energy-stats {
+        flex-direction: column;
+    }
+
+    .energy-stat-item {
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 10px 0;
+    }
+
+        .energy-stat-item:last-child {
+            border-bottom: none;
+        }
+}

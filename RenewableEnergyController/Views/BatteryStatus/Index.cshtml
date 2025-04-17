@@ -1,0 +1,309 @@
+@model RenewableEnergyController.Models.BatteryStatusModel
+@{
+    ViewBag.Title = "Battery Status";
+}
+
+<div class="battery-status-container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2><i class="fa fa-battery-three-quarters"></i> Battery Status</h2>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Current Status</h3>
+                </div>
+                <div class="panel-body text-center">
+                    <div class="battery-indicator">
+                        <div class="battery-graphic large">
+                            <div class="battery-level" style="height: @Model.ChargePercentage%"></div>
+                        </div>
+                        <div class="battery-percentage large">@Model.ChargePercentage%</div>
+                        <div class="battery-status-text">@Model.ChargeStatus</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Battery Details</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row battery-details">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fa fa-clock"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="detail-label">Estimated Runtime</div>
+                                    <div class="detail-value">@Model.EstimatedRuntimeHours hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fa fa-bolt"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="detail-label">Charging Rate</div>
+                                    <div class="detail-value">@Model.ChargingRate kW</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row battery-details">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fa fa-percentage"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="detail-label">Efficiency</div>
+                                    <div class="detail-value">@Model.EfficiencyPercentage%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fa fa-thermometer-half"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="detail-label">Temperature</div>
+                                    <div class="detail-value">32°C</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Charge History (Last 24 Hours)</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-container">
+                        <canvas id="batteryHistoryChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Discharge Rate</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-container">
+                        <canvas id="dischargeRateChart" style="height: 250px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Battery Health</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-container">
+                        <canvas id="batteryHealthChart" style="height: 250px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Battery Maintenance</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="maintenance-item">
+                                <h4>Last Maintenance</h4>
+                                <p>March 15, 2025</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="maintenance-item">
+                                <h4>Next Scheduled Check</h4>
+                                <p>June 15, 2025</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="maintenance-item">
+                                <h4>Battery Age</h4>
+                                <p>1 year, 4 months</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Battery History Chart
+            var historyCtx = document.getElementById('batteryHistoryChart').getContext('2d');
+
+            // Generate sample data for the past 24 hours
+            var labels = [];
+            var chargeData = [];
+            var baseCharge = @Model.ChargePercentage;
+
+            for (var i = 24; i >= 0; i--) {
+                var hour = new Date();
+                hour.setHours(hour.getHours() - i);
+                labels.push(hour.getHours() + ':00');
+
+                // Generate sample charge data with some variance
+                var randomVariance = (Math.random() * 10) - 5;
+                var charge = Math.min(100, Math.max(50, baseCharge + randomVariance - (i * 0.5)));
+                chargeData.push(charge);
+            }
+
+            var gradientFill = historyCtx.createLinearGradient(0, 0, 0, 350);
+            gradientFill.addColorStop(0, 'rgba(46, 204, 113, 0.4)');
+            gradientFill.addColorStop(1, 'rgba(46, 204, 113, 0.05)');
+
+            var batteryHistoryChart = new Chart(historyCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Battery Charge %',
+                        data: chargeData,
+                        borderColor: '#2ecc71',
+                        backgroundColor: gradientFill,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#2ecc71'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            suggestedMin: 50,
+                            suggestedMax: 100,
+                            title: {
+                                display: true,
+                                text: 'Charge %'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Discharge Rate Chart
+            var dischargeCtx = document.getElementById('dischargeRateChart').getContext('2d');
+
+            var dischargeRateChart = new Chart(dischargeCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+                    datasets: [{
+                        label: 'Discharge Rate (% per hour)',
+                        data: [1.2, 0.8, 1.5, 0.3],
+                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '% per hour'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Battery Health Chart
+            var healthCtx = document.getElementById('batteryHealthChart').getContext('2d');
+
+            var batteryHealthChart = new Chart(healthCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Excellent', 'Good', 'Average', 'Poor'],
+                    datasets: [{
+                        data: [@Model.EfficiencyPercentage, 100 - @Model.EfficiencyPercentage, 0, 0],
+                        backgroundColor: [
+                            '#2ecc71', // Green
+                            '#f1c40f', // Yellow
+                            '#e67e22', // Orange
+                            '#e74c3c'  // Red
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var label = context.label || '';
+                                    var value = context.parsed || 0;
+                                    return label + ': ' + value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

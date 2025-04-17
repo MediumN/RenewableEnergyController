@@ -1,0 +1,369 @@
+﻿@model RenewableEnergyController.Models.AnalyticsModel
+@{
+    ViewBag.Title = "Energy Analytics";
+}
+
+<div class="analytics-container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2><i class="fa fa-bar-chart"></i> Energy Analytics</h2>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Peak Usage</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="metric-value">@Model.PeakUsage.ToString("F1") kWh</div>
+                    <div class="metric-label">Daily Peak</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Average Usage</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="metric-value">@Model.AverageUsage.ToString("F1") kWh</div>
+                    <div class="metric-label">Daily Average</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Efficiency Rating</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="metric-value">94%</div>
+                    <div class="metric-label">System Efficiency</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-warning">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Carbon Offset</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="metric-value">320 kg</div>
+                    <div class="metric-label">CO₂ Avoided</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title-container">
+                        <h3 class="panel-title">Energy Usage Patterns</h3>
+                        <div class="panel-controls">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default btn-xs active" data-timeframe="daily">Daily</button>
+                                <button type="button" class="btn btn-default btn-xs" data-timeframe="weekly">Weekly</button>
+                                <button type="button" class="btn btn-default btn-xs" data-timeframe="monthly">Monthly</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-container">
+                        <canvas id="usageChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Energy Distribution</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-container">
+                        <canvas id="distributionChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Energy Production vs Consumption</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-container">
+                        <canvas id="productionVsConsumptionChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Efficiency Trends</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-container">
+                        <canvas id="efficiencyChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Historical Data</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Peak Usage (kWh)</th>
+                                    <th>Average Usage (kWh)</th>
+                                    <th>Production (kWh)</th>
+                                    <th>Efficiency (%)</th>
+                                    <th>Battery Cycles</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < 7; i++)
+                                {
+                                    var date = DateTime.Now.AddDays(-i);
+                                <tr>
+                                    <td>@date.ToString("MM/dd/yyyy")</td>
+                                    <td>@(Math.Round(Model.PeakUsage + (new Random().NextDouble() * 0.5 - 0.25), 1))</td>
+                                    <td>@(Math.Round(Model.AverageUsage + (new Random().NextDouble() * 0.3 - 0.15), 1))</td>
+                                    <td>@(Math.Round(15.0 + (new Random().NextDouble() * 2 - 1), 1))</td>
+                                    <td>@(90 + new Random().Next(0, 8))%</td>
+                                    <td>@(new Random().Next(1, 3))</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Daily usage chart
+            var usageCtx = document.getElementById('usageChart').getContext('2d');
+            var usageData = @Html.Raw(Json.Encode(Model.DailyUsage));
+
+            var usageChart = new Chart(usageCtx, {
+                type: 'bar',
+                data: {
+                    labels: usageData.map(function(d) { return d.Day; }),
+                    datasets: [{
+                        label: 'Daily Usage (kWh)',
+                        data: usageData.map(function(d) { return d.KWh; }),
+                        backgroundColor: 'rgba(70, 148, 218, 0.7)',
+                        borderColor: 'rgba(70, 148, 218, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'kWh'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Day'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Energy distribution chart
+            var distributionCtx = document.getElementById('distributionChart').getContext('2d');
+
+            var distributionChart = new Chart(distributionCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Household', 'Heating/Cooling', 'Lighting', 'Electronics', 'Other'],
+                    datasets: [{
+                        data: [35, 30, 15, 12, 8],
+                        backgroundColor: [
+                            '#3498db', // Blue
+                            '#e74c3c', // Red
+                            '#f1c40f', // Yellow
+                            '#2ecc71', // Green
+                            '#9b59b6'  // Purple
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var label = context.label || '';
+                                    var value = context.parsed || 0;
+                                    return label + ': ' + value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Production vs Consumption chart
+            var prodConsCtx = document.getElementById('productionVsConsumptionChart').getContext('2d');
+
+            // Generate sample data
+            var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            var production = [];
+            var consumption = [];
+
+            for (var i = 0; i < 7; i++) {
+                production.push(Math.round((14 + Math.random() * 3) * 10) / 10);
+                consumption.push(Math.round((12 + Math.random() * 4) * 10) / 10);
+            }
+
+            var prodConsChart = new Chart(prodConsCtx, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [
+                        {
+                            label: 'Production (kWh)',
+                            data: production,
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Consumption (kWh)',
+                            data: consumption,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'kWh'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Efficiency Trends chart
+            var efficiencyCtx = document.getElementById('efficiencyChart').getContext('2d');
+
+            // Generate sample efficiency data
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            var efficiencyData = [];
+            var baseEfficiency = 88;
+
+            for (var i = 0; i < 6; i++) {
+                efficiencyData.push(baseEfficiency + Math.round(Math.random() * 8));
+                baseEfficiency = Math.min(98, baseEfficiency + Math.round(Math.random() * 2));
+            }
+
+            var efficiencyChart = new Chart(efficiencyCtx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'System Efficiency (%)',
+                            data: efficiencyData,
+                            borderColor: '#f39c12',
+                            backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 80,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Efficiency (%)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Handle timeframe button clicks
+            $('[data-timeframe]').click(function() {
+                $('[data-timeframe]').removeClass('active');
+                $(this).addClass('active');
+
+                var timeframe = $(this).data('timeframe');
+
+                // Update chart data based on timeframe
+                // This would typically involve an AJAX call to get new data
+                // For this example, we'll just simulate different data
+
+                if (timeframe === 'daily') {
+                    usageChart.data.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    usageChart.data.datasets[0].data = [2.7, 3.1, 3.5, 2.5, 3.2, 2.8, 2.3];
+                } else if (timeframe === 'weekly') {
+                    usageChart.data.labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+                    usageChart.data.datasets[0].data = [18.5, 20.2, 19.3, 22.1];
+                } else if (timeframe === 'monthly') {
+                    usageChart.data.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+                    usageChart.data.datasets[0].data = [75.2, 68.3, 82.5, 88.2, 92.4, 85.6];
+                }
+
+                usageChart.update();
+            });
+        });
+    </script>
+}

@@ -1,0 +1,143 @@
+@model RenewableEnergyController.Models.EnergyProductionModel
+@{
+    ViewBag.Title = "Energy Production";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="energy-production-container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Energy Production</h1>
+            <p class="lead">Monitor and analyze your system's energy production.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Summary</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="metric large">
+                                <span class="metric-value">@Model.CurrentKWh.ToString("F1")</span>
+                                <span class="metric-label">Current kWh</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="metric">
+                                <span class="metric-value">@Model.DailyKWh.ToString("F1")</span>
+                                <span class="metric-label">Daily kWh</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="metric">
+                                <span class="metric-value">@Model.MonthlyKWh</span>
+                                <span class="metric-label">Monthly kWh</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Production Trends (Last 24 Hours)</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-container">
+                        <canvas id="productionTrendChart" width="600" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Production Data</h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>kWh Production</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dataPoint in Model.ProductionData.OrderByDescending(p => p.TimeStamp))
+                            {
+                            <tr>
+                                <td>@dataPoint.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                <td>@dataPoint.KWh.ToString("F2")</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Production Trend Chart
+            var productionData = @Html.Raw(Json.Encode(Model.ProductionData.Select(p => new { time = p.TimeStamp.ToString("HH:mm"), value = p.KWh })));
+            var ctx = document.getElementById('productionTrendChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: productionData.map(function(item) { return item.time; }),
+                    datasets: [{
+                        label: 'kWh Production',
+                        data: productionData.map(function(item) { return item.value; }),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'kWh'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}
